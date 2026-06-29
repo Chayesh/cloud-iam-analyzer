@@ -1,0 +1,11 @@
+{
+    "users": [
+        "iam-analyzer"
+    ],
+    "roles": [
+        "AWSServiceRoleForResourceExplorer",
+        "AWSServiceRoleForSupport",
+        "AWSServiceRoleForTrustedAdvisor"
+    ],
+    "policies": []
+}
