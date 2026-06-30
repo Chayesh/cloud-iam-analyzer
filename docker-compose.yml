@@ -1,0 +1,18 @@
+
+services:
+
+  iam-analyzer:
+
+    build: .
+
+    container_name: cloud-iam-analyzer
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - .:/app
+
+      - ~/.aws:/root/.aws:ro
+
+    restart: unless-stopped

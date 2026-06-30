@@ -1,10 +1,10 @@
 {
     "iam-analyzer": [
+        "sts:AssumeRole",
+        "iam:GetAccountPasswordPolicy",
         "iam:ChangePassword",
         "*",
-        "iam:GetAccountPasswordPolicy",
-        "iam:CreateRole",
-        "sts:AssumeRole",
-        "iam:AttachRolePolicy"
+        "iam:AttachRolePolicy",
+        "iam:CreateRole"
     ]
 }
