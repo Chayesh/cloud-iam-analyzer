@@ -3,10 +3,13 @@ import argparse
 
 from app.core.logger import logger
 from app.services.scan_service import ScanService
-
+from reports.pdf_report import PDFReportGenerator
 from visualization.graph_visualizer import draw_attack_chain
 from graph.attack_graph import AttackGraphBuilder
 from iac_scanner.terraform_scanner import TerraformScanner
+
+# NEW
+from reports.html_report import HTMLReportGenerator
 
 
 def banner():
@@ -115,6 +118,36 @@ def scan_terraform(directory):
 
 
 # ------------------------------------------------
+# Generate HTML Report
+# ------------------------------------------------
+def generate_html_report():
+
+    logger.info("Generating HTML security report...")
+
+    scan_service = ScanService()
+
+    _, findings = scan_service.scan()
+
+    generator = HTMLReportGenerator()
+
+    report_path = generator.generate(findings)
+
+    print(f"\nHTML report generated successfully:")
+    print(report_path)
+
+def generate_pdf_report():
+
+    logger.info("Generating PDF report...")
+
+    scan_service = ScanService()
+
+    _, findings = scan_service.scan()
+
+    report = PDFReportGenerator().generate(findings)
+
+    print(f"\nPDF report generated successfully:")
+    print(report)
+# ------------------------------------------------
 # CLI
 # ------------------------------------------------
 def main():
@@ -139,6 +172,18 @@ def main():
         "--iac",
         help="Scan Terraform IAM policies"
     )
+    parser.add_argument(
+        "--pdf",
+        action="store_true",
+        help="Generate PDF security report"
+    )
+
+    # NEW
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="Generate HTML security report"
+    )
 
     args = parser.parse_args()
 
@@ -148,7 +193,7 @@ def main():
 
         scan_service = ScanService()
 
-        permissions, findings = scan_service.scan()
+        _, findings = scan_service.scan()
 
         run_detection(findings)
 
@@ -163,9 +208,19 @@ def main():
 
         scan_terraform(args.iac)
 
+    elif args.pdf:
+
+        generate_pdf_report()
+        
+    # NEW
+    elif args.report:
+
+        generate_html_report()
+
     else:
 
         parser.print_help()
+        
 
 
 if __name__ == "__main__":

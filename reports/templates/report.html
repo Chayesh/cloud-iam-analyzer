@@ -1,92 +1,57 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cloud IAM Security Report</title>
+from datetime import datetime
+from pathlib import Path
 
-    <style>
+from jinja2 import Environment, FileSystemLoader
 
-        body{
-            font-family:Arial;
-            margin:40px;
-        }
 
-        table{
+class HTMLReportGenerator:
 
-            border-collapse:collapse;
-            width:100%;
-        }
+    def generate(self, findings):
 
-        th,td{
+        template_dir = Path(__file__).parent / "templates"
 
-            border:1px solid #ccc;
-            padding:10px;
-            text-align:left;
-        }
+        env = Environment(
+            loader=FileSystemLoader(template_dir)
+        )
 
-        th{
+        template = env.get_template("report.html")
 
-            background:#f5f5f5;
-        }
+        critical = sum(
+            1 for f in findings
+            if f.metadata.severity.value == "CRITICAL"
+        )
 
-        h1{
+        high = sum(
+            1 for f in findings
+            if f.metadata.severity.value == "HIGH"
+        )
 
-            color:#1f4e79;
-        }
+        report = template.render(
 
-        .critical{
+            findings=findings,
 
-            color:red;
-            font-weight:bold;
-        }
+            generated=datetime.now().strftime(
+                "%d %B %Y %H:%M"
+            ),
 
-        .high{
+            users=len(set(f.user for f in findings)),
 
-            color:orange;
-            font-weight:bold;
-        }
+            findings_count=len(findings),
 
-    </style>
+            critical=critical,
 
-</head>
+            high=high
+        )
 
-<body>
+        output_dir = Path(__file__).parent / "output"
 
-<h1>Cloud IAM Privilege Escalation Report</h1>
+        output_dir.mkdir(exist_ok=True)
 
-<p><b>Total Findings:</b> {{ findings|length }}</p>
+        report_path = output_dir / "security_report.html"
 
-<table>
+        report_path.write_text(
+            report,
+            encoding="utf-8"
+        )
 
-<tr>
-
-<th>User</th>
-
-<th>Rule</th>
-
-<th>Severity</th>
-
-<th>Score</th>
-
-</tr>
-
-{% for finding in findings %}
-
-<tr>
-
-<td>{{ finding.user }}</td>
-
-<td>{{ finding.metadata.title }}</td>
-
-<td>{{ finding.metadata.severity }}</td>
-
-<td>{{ finding.metadata.score }}</td>
-
-</tr>
-
-{% endfor %}
-
-</table>
-
-</body>
-
-</html>
+        return report_path
