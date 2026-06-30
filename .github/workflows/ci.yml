@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - feature/v2-core
 
   pull_request:
     branches:
