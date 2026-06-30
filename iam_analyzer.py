@@ -25,30 +25,43 @@ def run_detection(findings):
     if not findings:
 
         logger.info("No privilege escalation paths detected.")
-
         return
 
     for finding in findings:
 
+        metadata = finding.metadata
+
         logger.warning(
-            f"{finding['severity']} privilege escalation detected for {finding['user']}"
+            f"{metadata.severity.value} privilege escalation detected for {finding.user}"
         )
 
-        print(f"\nUser: {finding['user']}\n")
+        print(f"\nUser: {finding.user}\n")
 
-        print("Attack Chain:")
+        print(f"Rule ID : {metadata.rule_id}")
+        print(f"Title   : {metadata.title}")
+        print(f"Severity: {metadata.severity.value}")
+        print(f"Score   : {metadata.score}")
 
-        for step in finding["chain"]:
+        print("\nAttack Chain:")
+
+        for step in finding.chain:
             print(" →", step)
 
         print("\nRecommended Fix:")
 
-        for fix in finding["fix"]:
-            print(" -", fix)
+        for recommendation in metadata.recommendations:
+            print(" -", recommendation)
+
+        if metadata.references:
+
+            print("\nReferences:")
+
+            for ref in metadata.references:
+                print(" -", ref)
 
         print()
 
-        draw_attack_chain(finding["chain"])
+        draw_attack_chain(finding.chain)
 
 
 # ------------------------------------------------
