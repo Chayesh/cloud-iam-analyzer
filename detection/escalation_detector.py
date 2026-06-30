@@ -1,20 +1,22 @@
+from app.models.finding import Finding
+
 from detection.rules import load_rules
 
 
 class EscalationDetector:
     """
-    Executes all registered privilege escalation rules.
+    Executes all registered privilege escalation rules
+    and converts DetectionResults into Finding objects.
     """
 
-    def __init__(self, permissions):
+    def __init__(self, permissions: dict[str, list[str]]):
 
         self.permissions = permissions
-
         self.rules = load_rules()
 
-    def detect(self):
+    def detect(self) -> list[Finding]:
 
-        findings = []
+        findings: list[Finding] = []
 
         for user, actions in self.permissions.items():
 
@@ -22,10 +24,15 @@ class EscalationDetector:
 
                 result = rule.detect(actions)
 
-                if result:
+                if result is None:
+                    continue
 
-                    result["user"] = user
+                finding = Finding(
+                    metadata=rule.metadata,
+                    user=user,
+                    chain=result.chain
+                )
 
-                    findings.append(result)
+                findings.append(finding)
 
         return findings

@@ -1,22 +1,15 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.severity import Severity
+from app.models.rule_metadata import RuleMetadata
 
 
 class Finding(BaseModel):
     """
-    Represents a privilege escalation finding.
+    Dynamic finding produced after a rule matches.
     """
+
+    metadata: RuleMetadata
 
     user: str
 
-    severity: Severity
-
-    score: float = Field(
-        ge=0,
-        le=10
-    )
-
     chain: list[str]
-
-    fix: list[str]

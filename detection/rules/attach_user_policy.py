@@ -1,31 +1,39 @@
 from detection.base_rule import BaseDetectionRule
 
+from app.models.detection_result import DetectionResult
+from app.models.rule_metadata import RuleMetadata
+from app.models.severity import Severity
+
 
 class AttachUserPolicyRule(BaseDetectionRule):
-    """
-    Detects direct AdministratorAccess attachment to a user.
-    """
 
     @property
-    def name(self) -> str:
-        return "Attach User Policy"
+    def metadata(self) -> RuleMetadata:
 
-    def detect(self, actions: list[str]):
+        return RuleMetadata(
+            rule_id="AWS-IAM-005",
+            title="Attach User Policy",
+            description="Detects direct attachment of policies to IAM users.",
+            severity=Severity.CRITICAL,
+            score=10.0,
+            recommendations=[
+                "Restrict iam:AttachUserPolicy permission",
+                "Require approval workflow",
+                "Audit IAM policy changes"
+            ],
+            references=[]
+        )
+
+    def detect(self, actions: list[str]) -> DetectionResult | None:
 
         if "iam:AttachUserPolicy" in actions:
 
-            return {
-                "severity": "CRITICAL",
-                "score": 10.0,
-                "chain": [
+            return DetectionResult(
+                detected=True,
+                chain=[
                     "iam:AttachUserPolicy",
                     "AdministratorAccess"
-                ],
-                "fix": [
-                    "Restrict iam:AttachUserPolicy permission",
-                    "Require approval workflow for policy attachment",
-                    "Audit IAM policy changes"
                 ]
-            }
+            )
 
         return None
